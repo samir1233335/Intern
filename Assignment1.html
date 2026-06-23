@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online Movie Ticket Booking System</title>
+</head>
+
+<body>
+
+    <h1>Online Movie Ticket Booking System</h1>
+
+    <form>
+
+        <label for="name">Full Name:</label><br>
+        <input type="text" id="name" name="name">
+        <br><br>
+
+        <label for="email">Email Address:</label><br>
+        <input type="email" id="email" name="email">
+        <br><br>
+
+        <label for="phone">Phone Number:</label><br>
+        <input type="tel" id="phone" name="phone">
+        <br><br>
+
+        <label for="movie">Select Movie:</label><br>
+        <select id="movie" name="movie">
+            <option>Avengers: Endgame</option>
+            <option>Batman Begins</option>
+            <option>Spider-Man: No Way Home</option>
+            <option>Interstellar</option>
+        </select>
+        <br><br>
+
+        <label for="date">Select Date:</label><br>
+        <select id="date" name="date">
+            <option>25 June 2026</option>
+            <option>26 June 2026</option>
+            <option>27 June 2026</option>
+        </select>
+        <br><br>
+
+        <label for="time">Select Show Time:</label><br>
+        <select id="time" name="time">
+            <option>10:00 AM</option>
+            <option>1:00 PM</option>
+            <option>4:00 PM</option>
+            <option>7:00 PM</option>
+        </select>
+        <br><br>
+
+        <label for="tickets">Number of Tickets:</label><br>
+        <input type="number" id="tickets" name="tickets">
+        <br><br>
+
+        <p>Seat Type:</p>
+
+        <input type="radio" id="regular" name="seat" value="Regular">
+        <label for="regular">Regular</label><br>
+
+        <input type="radio" id="vip" name="seat" value="VIP">
+        <label for="vip">VIP</label><br>
+
+        <input type="radio" id="premium" name="seat" value="Premium">
+        <label for="premium">Premium</label>
+        <br><br>
+
+        <p>Food Options:</p>
+
+        <input type="checkbox" id="popcorn" name="food" value="Popcorn">
+        <label for="popcorn">Popcorn</label><br>
+
+        <input type="checkbox" id="drink" name="food" value="Cold Drink">
+        <label for="drink">Cold Drink</label><br>
+
+        <input type="checkbox" id="nachos" name="food" value="Nachos">
+        <label for="nachos">Nachos</label>
+        <br><br>
+
+        <label for="request">Special Request:</label><br>
+        <textarea id="request" name="request" rows="4" cols="30"></textarea>
+        <br><br>
+
+        <input type="submit" value="Submit">
+        <input type="reset" value="Reset">
+
+    </form>
+
+</body>
+</html>
