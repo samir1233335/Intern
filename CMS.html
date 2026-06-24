@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Clinical Management System</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial, sans-serif;
+}
+
+body{
+    background:#f4f8fc;
+    color:#333;
+    line-height:1.6;
+}
+
+/* Navbar */
+.navbar{
+    position:sticky;
+    top:0;
+    z-index:1000;
+    background:#fff;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:20px 8%;
+    box-shadow:0 2px 10px rgba(0,0,0,0.1);
+}
+
+.logo{
+    font-size:1.4rem;
+    font-weight:bold;
+    color:#0077cc;
+}
+
+.nav-links{
+    display:flex;
+    list-style:none;
+    gap:20px;
+}
+
+.nav-links a{
+    text-decoration:none;
+    color:#333;
+    transition:.3s;
+}
+
+.nav-links a:hover{
+    color:#0077cc;
+}
+
+/* Hero */
+.hero{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:80px 8%;
+    gap:40px;
+}
+
+.hero-content h1{
+    font-size:3rem;
+    color:#0077cc;
+    margin-bottom:15px;
+}
+
+.hero-content p{
+    margin-bottom:20px;
+}
+
+.hero-image img{
+    width:100%;
+    border-radius:10px;
+}
+
+.btn{
+    display:inline-block;
+    padding:12px 20px;
+    background:#0077cc;
+    color:#fff;
+    border-radius:5px;
+    text-decoration:none;
+    margin-right:10px;
+}
+
+.btn:hover{
+    background:#005fa3;
+}
+
+.btn-secondary{
+    background:#555;
+}
+
+/* Sections */
+.section{
+    padding:80px 8%;
+}
+
+.section-title{
+    text-align:center;
+    color:#0077cc;
+    margin-bottom:40px;
+}
+
+/* Grid */
+.grid{
+    display:grid;
+    gap:20px;
+    grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+}
+
+/* Cards */
+.card{
+    background:#fff;
+    padding:20px;
+    border-radius:10px;
+    box-shadow:0 3px 10px rgba(0,0,0,0.1);
+    text-align:center;
+}
+
+/* Services */
+.service i{
+    font-size:30px;
+    color:#0077cc;
+    margin-bottom:10px;
+}
+
+/* Doctors */
+.card img{
+    width:100%;
+    border-radius:10px;
+}
+
+/* Departments */
+.department{
+    background:#0077cc;
+    color:#fff;
+    padding:30px;
+    border-radius:10px;
+    text-align:center;
+}
+
+/* Form */
+form{
+    max-width:700px;
+    margin:auto;
+    display:grid;
+    gap:15px;
+}
+
+input,select,textarea{
+    padding:12px;
+    border:1px solid #ccc;
+    border-radius:5px;
+}
+
+button{
+    padding:12px;
+    background:#0077cc;
+    color:#fff;
+    border:none;
+    cursor:pointer;
+}
+
+button:hover{
+    background:#005fa3;
+}
+
+/* Table */
+table{
+    width:100%;
+    border-collapse:collapse;
+    background:#fff;
+}
+
+th,td{
+    border:1px solid #ddd;
+    padding:10px;
+    text-align:center;
+}
+
+th{
+    background:#0077cc;
+    color:#fff;
+}
+
+/* Contact */
+.contact-box{
+    text-align:center;
+    background:#fff;
+    padding:30px;
+    border-radius:10px;
+}
+
+/* Footer */
+footer{
+    background:#003b66;
+    color:#fff;
+    text-align:center;
+    padding:20px;
+    margin-top:40px;
+}
+
+/* Responsive */
+@media(max-width:768px){
+    .hero{
+        flex-direction:column;
+        text-align:center;
+    }
+
+    .nav-links{
+        flex-wrap:wrap;
+        justify-content:center;
+    }
+
+    .hero-content h1{
+        font-size:2rem;
+    }
+}
+</style>
+
+</head>
+
+<body>
+
+<!-- Navbar -->
+<nav class="navbar">
+    <div class="logo">Clinical Management System</div>
+    <ul class="nav-links">
+        <li><a href="#home">Home</a></li>
+        <li><a href="#about">About</a></li>
+        <li><a href="#services">Services</a></li>
+        <li><a href="#doctors">Doctors</a></li>
+        <li><a href="#departments">Departments</a></li>
+        <li><a href="#appointment">Appointments</a></li>
+        <li><a href="#patients">Patients</a></li>
+        <li><a href="#contact">Contact</a></li>
+    </ul>
+</nav>
+
+<!-- Hero -->
+<section class="hero" id="home">
+    <div class="hero-content">
+        <h1>Your Health, Our Priority</h1>
+        <p>We provide quality healthcare with experienced doctors and modern facilities.</p>
+        <a href="#appointment" class="btn">Book Appointment</a>
+        <a href="#about" class="btn btn-secondary">Learn More</a>
+    </div>
+
+    <div class="hero-image">
+        <img src="https://images.unsplash.com/photo-1584515933487-779824d29309?w=700" alt="">
+    </div>
+</section>
+
+<!-- About -->
+<section class="section" id="about">
+    <h2 class="section-title">About Us</h2>
+    <div class="grid">
+        <div class="card">
+            <h3>Mission</h3>
+            <p>Provide quality healthcare for everyone.</p>
+        </div>
+        <div class="card">
+            <h3>Vision</h3>
+            <p>Build a healthy and safe society.</p>
+        </div>
+        <div class="card">
+            <h3>Care</h3>
+            <p>Patient-focused medical services.</p>
+        </div>
+    </div>
+</section>
+
+<!-- Services -->
+<section class="section" id="services">
+    <h2 class="section-title">Services</h2>
+    <div class="grid">
+        <div class="card service"><i>🚑</i><h3>Emergency</h3></div>
+        <div class="card service"><i>🧪</i><h3>Laboratory</h3></div>
+        <div class="card service"><i>💊</i><h3>Pharmacy</h3></div>
+        <div class="card service"><i>🏥</i><h3>Surgery</h3></div>
+        <div class="card service"><i>🩻</i><h3>Diagnostics</h3></div>
+        <div class="card service"><i>🚑</i><h3>Ambulance</h3></div>
+    </div>
+</section>
+
+<!-- Doctors -->
+<section class="section" id="doctors">
+    <h2 class="section-title">Doctors</h2>
+    <div class="grid">
+        <div class="card"><img src="https://via.placeholder.com/200"><h3>Dr. A</h3><p>Cardiologist</p></div>
+        <div class="card"><img src="https://via.placeholder.com/200"><h3>Dr. B</h3><p>Neurologist</p></div>
+        <div class="card"><img src="https://via.placeholder.com/200"><h3>Dr. C</h3><p>Orthopedic</p></div>
+        <div class="card"><img src="https://via.placeholder.com/200"><h3>Dr. D</h3><p>Pediatric</p></div>
+    </div>
+</section>
+
+<!-- Departments -->
+<section class="section" id="departments">
+    <h2 class="section-title">Departments</h2>
+    <div class="grid">
+        <div class="department">Cardiology</div>
+        <div class="department">Neurology</div>
+        <div class="department">Orthopedics</div>
+        <div class="department">Pediatrics</div>
+        <div class="department">Dermatology</div>
+        <div class="department">Radiology</div>
+    </div>
+</section>
+
+<!-- Appointment -->
+<section class="section" id="appointment">
+    <h2 class="section-title">Book Appointment</h2>
+    <form>
+        <input type="text" placeholder="Patient Name">
+        <input type="email" placeholder="Email">
+        <input type="tel" placeholder="Phone Number">
+
+        <select>
+            <option>Select Department</option>
+        </select>
+
+        <select>
+            <option>Select Doctor</option>
+        </select>
+
+        <input type="date">
+        <textarea rows="4" placeholder="Message"></textarea>
+        <button type="submit">Submit</button>
+    </form>
+</section>
+
+<!-- Patients -->
+<section class="section" id="patients">
+    <h2 class="section-title">Patient Records</h2>
+
+    <table>
+        <tr>
+            <th>ID</th><th>Name</th><th>Age</th><th>Disease</th><th>Doctor</th><th>Status</th>
+        </tr>
+        <tr><td>P1</td><td>John</td><td>45</td><td>Heart</td><td>Dr A</td><td>Stable</td></tr>
+        <tr><td>P2</td><td>Anna</td><td>30</td><td>Flu</td><td>Dr B</td><td>Recovering</td></tr>
+    </table>
+</section>
+
+<!-- Contact -->
+<section class="section" id="contact">
+    <h2 class="section-title">Contact</h2>
+    <div class="contact-box">
+        <p>Address: Kathmandu, Nepal</p>
+        <p>Phone: +977-9800000000</p>
+        <p>Email: clinic@gmail.com</p>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer>
+    <p>© 2026 Clinical Management System | All Rights Reserved</p>
+</footer>
+
+</body>
+</html>
