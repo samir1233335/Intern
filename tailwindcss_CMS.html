@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MedCore Clinical Management System</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            display: ['Playfair Display', 'serif'],
+          },
+          colors: {
+            'blue-dark':  '#0a1f44',
+            'blue-mid':   '#1a56db',
+            'blue-light': '#3b82f6',
+            'blue-pale':  '#dbeafe',
+            'teal':       '#0ea5e9',
+            'offwhite':   '#f0f6ff',
+          },
+          backgroundImage: {
+            'hero-grad': 'linear-gradient(135deg, #0a1f44 0%, #0f3460 45%, #164c8c 100%)',
+            'dept-grad': 'linear-gradient(135deg, #0a1f44 0%, #0f3460 100%)',
+            'brand-grad':'linear-gradient(135deg, #1a56db, #0ea5e9)',
+            'emerg-grad':'linear-gradient(90deg, #dc2626, #b91c1c)',
+          },
+          keyframes: {
+            spin:      { to: { transform: 'rotate(360deg)' } },
+            floatCard: { '0%,100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-10px)' } },
+            pulseAnim: { '0%,100%': { opacity: '1', transform: 'scale(1)' }, '50%': { opacity: '.6', transform: 'scale(1.3)' } },
+            revealUp:  { from: { opacity: '0', transform: 'translateY(30px)' }, to: { opacity: '1', transform: 'translateY(0)' } },
+          },
+          animation: {
+            'spin-slow':    'spin 1s linear infinite',
+            'float-card':   'floatCard 4s ease-in-out infinite',
+            'pulse-dot':    'pulseAnim 1.5s ease infinite',
+          },
+          boxShadow: {
+            'card': '0 8px 32px rgba(10,31,68,0.12)',
+            'brand':'0 4px 20px rgba(26,86,219,0.45)',
+            'brand-lg':'0 8px 28px rgba(26,86,219,0.55)',
+          }
+        }
+      }
+    }
+  </script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <style>
+    /* Utilities not easily expressible in Tailwind config */
+    .glass { background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.25); backdrop-filter: blur(18px); }
+    .glass-dark { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); backdrop-filter: blur(10px); }
+    .hero-bg::before { content:''; position:absolute; inset:0; background:url('https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=1400&q=80') center/cover no-repeat; opacity:.12; }
+    .reveal { opacity:0; transform:translateY(30px); transition:opacity .6s ease, transform .6s ease; }
+    .reveal.visible { opacity:1; transform:translateY(0); }
+    .faq-a { max-height:0; overflow:hidden; transition:max-height .4s ease, padding .3s; }
+    .faq-item.open .faq-a { max-height:300px; }
+    .faq-item.open .faq-arrow { transform:rotate(180deg); }
+    .slides { display:flex; transition:transform .5s ease; }
+    .slide { min-width:100%; }
+    /* Form focus ring */
+    .form-input:focus { border-color:#1a56db; box-shadow:0 0 0 3px rgba(26,86,219,0.12); outline:none; }
+    .form-input.invalid { border-color:#dc2626; }
+    .error-msg { display:none; font-size:.75rem; color:#dc2626; margin-top:2px; }
+    .form-group.invalid .error-msg { display:block; }
+  </style>
+</head>
+<body class="font-sans text-slate-800 bg-offwhite overflow-x-hidden">
+
+<!-- ══════════════════ LOADER ══════════════════ -->
+<div id="loader" class="fixed inset-0 z-[9999] bg-blue-dark flex flex-col items-center justify-center transition-opacity duration-500">
+  <div class="w-14 h-14 border-4 border-white/20 border-t-teal rounded-full animate-spin-slow"></div>
+  <p class="text-white mt-4 text-xs tracking-[2px] uppercase">MedCore Loading...</p>
+</div>
+
+<!-- ══════════════════ HEADER ══════════════════ -->
+<header id="header" class="sticky top-0 z-[1000] bg-blue-dark/92 backdrop-blur-md border-b border-white/[0.08] px-[5%] flex items-center justify-between h-[70px] transition-shadow duration-300">
+  <a href="#" class="flex items-center gap-2.5 no-underline">
+    <div class="w-10 h-10 rounded-[10px] bg-brand-grad flex items-center justify-center text-white text-lg">
+      <i class="fas fa-plus"></i>
+    </div>
+    <span class="font-display text-xl text-white font-bold">Med<span class="text-teal">Core</span></span>
+  </a>
+
+  <nav class="hidden lg:flex items-center gap-7">
+    <a href="#about"       class="text-white/80 text-sm font-medium hover:text-teal transition-colors">About</a>
+    <a href="#services"    class="text-white/80 text-sm font-medium hover:text-teal transition-colors">Services</a>
+    <a href="#doctors"     class="text-white/80 text-sm font-medium hover:text-teal transition-colors">Doctors</a>
+    <a href="#departments" class="text-white/80 text-sm font-medium hover:text-teal transition-colors">Departments</a>
+    <a href="#records"     class="text-white/80 text-sm font-medium hover:text-teal transition-colors">Records</a>
+    <a href="#faq"         class="text-white/80 text-sm font-medium hover:text-teal transition-colors">FAQ</a>
+    <a href="#contact"     class="text-white/80 text-sm font-medium hover:text-teal transition-colors">Contact</a>
+  </nav>
+
+  <a href="#appointment" class="hidden lg:inline-block bg-brand-grad text-white px-5 py-2.5 rounded-lg text-sm font-semibold hover:opacity-90 hover:-translate-y-px transition-all">Book Appointment</a>
+
+  <button id="hamburger" onclick="toggleMenu()" class="lg:hidden flex flex-col gap-[5px] cursor-pointer p-1.5">
+    <span class="w-6 h-0.5 bg-white rounded-sm transition-all"></span>
+    <span class="w-6 h-0.5 bg-white rounded-sm transition-all"></span>
+    <span class="w-6 h-0.5 bg-white rounded-sm transition-all"></span>
+  </button>
+</header>
+
+<!-- MOBILE NAV -->
+<div id="mobileNav" class="hidden fixed top-[70px] inset-x-0 z-[999] bg-blue-dark/97 backdrop-blur-md flex-col px-[5%] border-b border-white/10">
+  <a href="#about"       onclick="closeMenu()" class="text-white/85 py-3 border-b border-white/[0.07] text-[0.95rem]">About</a>
+  <a href="#services"    onclick="closeMenu()" class="text-white/85 py-3 border-b border-white/[0.07] text-[0.95rem]">Services</a>
+  <a href="#doctors"     onclick="closeMenu()" class="text-white/85 py-3 border-b border-white/[0.07] text-[0.95rem]">Doctors</a>
+  <a href="#departments" onclick="closeMenu()" class="text-white/85 py-3 border-b border-white/[0.07] text-[0.95rem]">Departments</a>
+  <a href="#appointment" onclick="closeMenu()" class="text-white/85 py-3 border-b border-white/[0.07] text-[0.95rem]">Appointment</a>
+  <a href="#records"     onclick="closeMenu()" class="text-white/85 py-3 border-b border-white/[0.07] text-[0.95rem]">Records</a>
+  <a href="#faq"         onclick="closeMenu()" class="text-white/85 py-3 border-b border-white/[0.07] text-[0.95rem]">FAQ</a>
+  <a href="#contact"     onclick="closeMenu()" class="text-white/85 py-3 text-[0.95rem]">Contact</a>
+</div>
+
+<!-- ══════════════════ HERO ══════════════════ -->
+<section class="hero-bg relative min-h-[92vh] bg-hero-grad flex items-center px-[5%] py-20 overflow-hidden" id="hero">
+  <div class="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center max-w-[1200px] mx-auto w-full">
+
+    <!-- Left -->
+    <div>
+      <div class="inline-flex items-center gap-2 bg-blue-500/20 border border-blue-500/40 text-teal rounded-full px-3.5 py-1.5 text-[0.78rem] font-semibold tracking-wide uppercase mb-5">
+        <i class="fas fa-shield-halved"></i> Trusted Healthcare Since 1998
+      </div>
+      <h1 class="font-display text-[clamp(2.2rem,4.5vw,3.6rem)] leading-[1.15] text-white mb-5">
+        Your Health Is Our <span class="text-teal">Top Priority</span>
+      </h1>
+      <p class="text-white/72 text-[1.05rem] leading-7 mb-9 max-w-[480px]">
+        MedCore Clinical Management System brings world-class medical expertise to your doorstep. Advanced diagnostics, compassionate care, and cutting-edge technology — all in one place.
+      </p>
+      <div class="flex gap-3.5 flex-wrap">
+        <a href="#appointment" class="inline-flex items-center gap-2 bg-brand-grad text-white px-7 py-3.5 rounded-[10px] font-semibold text-[0.95rem] shadow-brand hover:-translate-y-0.5 hover:shadow-brand-lg transition-all">
+          <i class="fas fa-calendar-check"></i> Book Appointment
+        </a>
+        <a href="#about" class="inline-flex items-center gap-2 bg-transparent text-white border border-white/45 px-7 py-3.5 rounded-[10px] font-semibold text-[0.95rem] hover:bg-white/10 hover:border-white/70 transition-all">
+          <i class="fas fa-play-circle"></i> Learn More
+        </a>
+      </div>
+    </div>
+
+    <!-- Right – Glass Card -->
+    <div class="hidden lg:block">
+      <div class="glass rounded-[20px] p-9 animate-float-card">
+        <h3 class="text-white text-[1.1rem] mb-5"><i class="fas fa-chart-line"></i> &nbsp;Live Hospital Stats</h3>
+        <div class="flex gap-4 flex-wrap mb-3.5">
+          <div class="flex-1 min-w-[90px] bg-white/[0.08] rounded-xl p-3.5 text-center">
+            <div class="text-2xl font-extrabold text-teal">98%</div>
+            <div class="text-[0.72rem] text-white/60 mt-1">Patient Satisfaction</div>
+          </div>
+          <div class="flex-1 min-w-[90px] bg-white/[0.08] rounded-xl p-3.5 text-center">
+            <div class="text-2xl font-extrabold text-teal">24/7</div>
+            <div class="text-[0.72rem] text-white/60 mt-1">Emergency Care</div>
+          </div>
+          <div class="flex-1 min-w-[90px] bg-white/[0.08] rounded-xl p-3.5 text-center">
+            <div class="text-2xl font-extrabold text-teal">150+</div>
+            <div class="text-[0.72rem] text-white/60 mt-1">Specialists</div>
+          </div>
+        </div>
+        <div class="inline-flex items-center gap-1.5 bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 rounded-full px-3.5 py-1.5 text-[0.78rem] font-semibold">
+          <div class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse-dot"></div>
+          47 Patients Currently Online
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════ STATS ══════════════════ -->
+<div class="bg-blue-dark py-16 px-[5%]">
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-6 max-w-[1100px] mx-auto">
+    <div class="glass-dark rounded-2xl p-9 text-center hover:-translate-y-1.5 transition-transform reveal">
+      <div class="text-3xl text-teal mb-3"><i class="fas fa-user-injured"></i></div>
+      <div class="count text-[2.4rem] font-extrabold text-white leading-none" data-target="48500">0</div>
+      <div class="text-white/60 text-sm mt-1.5">Patients Treated</div>
+    </div>
+    <div class="glass-dark rounded-2xl p-9 text-center hover:-translate-y-1.5 transition-transform reveal">
+      <div class="text-3xl text-teal mb-3"><i class="fas fa-user-doctor"></i></div>
+      <div class="count text-[2.4rem] font-extrabold text-white leading-none" data-target="150">0</div>
+      <div class="text-white/60 text-sm mt-1.5">Expert Doctors</div>
+    </div>
+    <div class="glass-dark rounded-2xl p-9 text-center hover:-translate-y-1.5 transition-transform reveal">
+      <div class="text-3xl text-teal mb-3"><i class="fas fa-hospital"></i></div>
+      <div class="count text-[2.4rem] font-extrabold text-white leading-none" data-target="24">0</div>
+      <div class="text-white/60 text-sm mt-1.5">Departments</div>
+    </div>
+    <div class="glass-dark rounded-2xl p-9 text-center hover:-translate-y-1.5 transition-transform reveal">
+      <div class="text-3xl text-teal mb-3"><i class="fas fa-award"></i></div>
+      <div class="count text-[2.4rem] font-extrabold text-white leading-none" data-target="96">0</div>
+      <div class="text-white/60 text-sm mt-1.5">Awards Won</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════ ABOUT ══════════════════ -->
+<section class="bg-white py-[90px] px-[5%]" id="about">
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center max-w-[1100px] mx-auto">
+
+    <!-- Image -->
+    <div class="relative reveal">
+      <img src="https://images.unsplash.com/photo-1551601651-2a8555f1a136?w=700&q=80" alt="Hospital interior"
+           class="w-full rounded-[20px] h-[420px] object-cover shadow-card"/>
+      <div class="absolute -bottom-5 -right-5 bg-brand-grad text-white rounded-2xl px-6 py-4 text-center shadow-[0_8px_24px_rgba(26,86,219,0.35)] hidden sm:block">
+        <div class="text-3xl font-extrabold">26+</div>
+        <div class="text-[0.75rem] opacity-85">Years of Excellence</div>
+      </div>
+    </div>
+
+    <!-- Text -->
+    <div class="reveal">
+      <p class="text-[0.78rem] font-bold tracking-[2px] uppercase text-blue-mid mb-2.5">Who We Are</p>
+      <h2 class="font-display text-[clamp(1.8rem,3vw,2.5rem)] text-blue-dark mb-3.5">Committed to Exceptional Patient Care</h2>
+      <p class="text-slate-500 leading-7 mb-6">Founded in 1998, MedCore Hospital has grown into a leading multi-specialty healthcare institution. We combine clinical expertise with a patient-centred philosophy to deliver care that truly makes a difference.</p>
+
+      <div class="flex flex-col gap-4 my-7">
+        <div class="bg-offwhite border-l-[3px] border-blue-mid rounded-r-[10px] px-5 py-4">
+          <h4 class="font-bold text-[0.95rem] text-blue-dark mb-1"><i class="fas fa-bullseye text-blue-mid mr-1.5"></i>Our Mission</h4>
+          <p class="text-sm text-slate-500 leading-relaxed">To provide safe, effective, and compassionate healthcare to every patient, regardless of background or condition.</p>
+        </div>
+        <div class="bg-offwhite border-l-[3px] border-blue-mid rounded-r-[10px] px-5 py-4">
+          <h4 class="font-bold text-[0.95rem] text-blue-dark mb-1"><i class="fas fa-eye text-blue-mid mr-1.5"></i>Our Vision</h4>
+          <p class="text-sm text-slate-500 leading-relaxed">To be the region's most trusted healthcare provider, setting benchmarks in clinical excellence and patient satisfaction.</p>
+        </div>
+        <div class="bg-offwhite border-l-[3px] border-blue-mid rounded-r-[10px] px-5 py-4">
+          <h4 class="font-bold text-[0.95rem] text-blue-dark mb-1"><i class="fas fa-heart text-blue-mid mr-1.5"></i>Our Values</h4>
+          <p class="text-sm text-slate-500 leading-relaxed">Integrity, empathy, innovation, and teamwork guide everything we do at MedCore.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════ SERVICES ══════════════════ -->
+<section class="bg-offwhite py-[90px] px-[5%]" id="services">
+  <div class="text-center mb-14">
+    <p class="text-[0.78rem] font-bold tracking-[2px] uppercase text-blue-mid mb-2.5">What We Offer</p>
+    <h2 class="font-display text-[clamp(1.8rem,3vw,2.5rem)] text-blue-dark mb-3.5">Our Medical Services</h2>
+    <p class="text-slate-500 text-base leading-7 max-w-[560px] mx-auto">From routine check-ups to complex surgeries, our team delivers comprehensive care across every discipline.</p>
+  </div>
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-[1200px] mx-auto">
+    <!-- service cards -->
+    <div class="service-card group bg-white rounded-2xl p-8 shadow-card border border-transparent hover:-translate-y-2 hover:border-blue-light hover:shadow-[0_16px_48px_rgba(26,86,219,0.15)] transition-all cursor-default reveal">
+      <div class="w-14 h-14 rounded-[14px] bg-blue-pale flex items-center justify-center text-2xl text-blue-mid mb-[18px] group-hover:bg-brand-grad group-hover:text-white transition-all">
+        <i class="fas fa-heart-pulse"></i></div>
+      <h3 class="text-base font-bold text-blue-dark mb-2">Cardiology</h3>
+      <p class="text-[0.83rem] text-slate-500 leading-relaxed">Advanced diagnostics and treatments for all heart conditions with state-of-the-art cath labs.</p>
+    </div>
+    <div class="service-card group bg-white rounded-2xl p-8 shadow-card border border-transparent hover:-translate-y-2 hover:border-blue-light hover:shadow-[0_16px_48px_rgba(26,86,219,0.15)] transition-all cursor-default reveal">
+      <div class="w-14 h-14 rounded-[14px] bg-blue-pale flex items-center justify-center text-2xl text-blue-mid mb-[18px] group-hover:bg-brand-grad group-hover:text-white transition-all">
+        <i class="fas fa-brain"></i></div>
+      <h3 class="text-base font-bold text-blue-dark mb-2">Neurology</h3>
+      <p class="text-[0.83rem] text-slate-500 leading-relaxed">Comprehensive brain, spine, and nerve disorder care with MRI-guided precision therapies.</p>
+    </div>
+    <div class="service-card group bg-white rounded-2xl p-8 shadow-card border border-transparent hover:-translate-y-2 hover:border-blue-light hover:shadow-[0_16px_48px_rgba(26,86,219,0.15)] transition-all cursor-default reveal">
+      <div class="w-14 h-14 rounded-[14px] bg-blue-pale flex items-center justify-center text-2xl text-blue-mid mb-[18px] group-hover:bg-brand-grad group-hover:text-white transition-all">
+        <i class="fas fa-bone"></i></div>
+      <h3 class="text-base font-bold text-blue-dark mb-2">Orthopedics</h3>
+      <p class="text-[0.83rem] text-slate-500 leading-relaxed">Joint replacement, sports medicine, and spinal surgery from expert orthopedic surgeons.</p>
+    </div>
+    <div class="service-card group bg-white rounded-2xl p-8 shadow-card border border-transparent hover:-translate-y-2 hover:border-blue-light hover:shadow-[0_16px_48px_rgba(26,86,219,0.15)] transition-all cursor-default reveal">
+      <div class="w-14 h-14 rounded-[14px] bg-blue-pale flex items-center justify-center text-2xl text-blue-mid mb-[18px] group-hover:bg-brand-grad group-hover:text-white transition-all">
+        <i class="fas fa-baby"></i></div>
+      <h3 class="text-base font-bold text-blue-dark mb-2">Pediatrics</h3>
+      <p class="text-[0.83rem] text-slate-500 leading-relaxed">Dedicated child health services from newborns to adolescents in a welcoming environment.</p>
+    </div>
+    <div class="service-card group bg-white rounded-2xl p-8 shadow-card border border-transparent hover:-translate-y-2 hover:border-blue-light hover:shadow-[0_16px_48px_rgba(26,86,219,0.15)] transition-all cursor-default reveal">
+      <div class="w-14 h-14 rounded-[14px] bg-blue-pale flex items-center justify-center text-2xl text-blue-mid mb-[18px] group-hover:bg-brand-grad group-hover:text-white transition-all">
+        <i class="fas fa-ribbon"></i></div>
+      <h3 class="text-base font-bold text-blue-dark mb-2">Oncology</h3>
+      <p class="text-[0.83rem] text-slate-500 leading-relaxed">Multidisciplinary cancer care including chemotherapy, radiation, and immunotherapy programs.</p>
+    </div>
+    <div class="service-card group bg-white rounded-2xl p-8 shadow-card border border-transparent hover:-translate-y-2 hover:border-blue-light hover:shadow-[0_16px_48px_rgba(26,86,219,0.15)] transition-all cursor-default reveal">
+      <div class="w-14 h-14 rounded-[14px] bg-blue-pale flex items-center justify-center text-2xl text-blue-mid mb-[18px] group-hover:bg-brand-grad group-hover:text-white transition-all">
+        <i class="fas fa-eye"></i></div>
+      <h3 class="text-base font-bold text-blue-dark mb-2">Ophthalmology</h3>
+      <p class="text-[0.83rem] text-slate-500 leading-relaxed">LASIK, cataract surgery, and retinal treatments using the latest laser technologies.</p>
+    </div>
+    <div class="service-card group bg-white rounded-2xl p-8 shadow-card border border-transparent hover:-translate-y-2 hover:border-blue-light hover:shadow-[0_16px_48px_rgba(26,86,219,0.15)] transition-all cursor-default reveal">
+      <div class="w-14 h-14 rounded-[14px] bg-blue-pale flex items-center justify-center text-2xl text-blue-mid mb-[18px] group-hover:bg-brand-grad group-hover:text-white transition-all">
+        <i class="fas fa-lungs"></i></div>
+      <h3 class="text-base font-bold text-blue-dark mb-2">Pulmonology</h3>
+      <p class="text-[0.83rem] text-slate-500 leading-relaxed">Expert management of asthma, COPD, sleep disorders, and respiratory infections.</p>
+    </div>
+    <div class="service-card group bg-white rounded-2xl p-8 shadow-card border border-transparent hover:-translate-y-2 hover:border-blue-light hover:shadow-[0_16px_48px_rgba(26,86,219,0.15)] transition-all cursor-default reveal">
+      <div class="w-14 h-14 rounded-[14px] bg-blue-pale flex items-center justify-center text-2xl text-blue-mid mb-[18px] group-hover:bg-brand-grad group-hover:text-white transition-all">
+        <i class="fas fa-syringe"></i></div>
+      <h3 class="text-base font-bold text-blue-dark mb-2">Endocrinology</h3>
+      <p class="text-[0.83rem] text-slate-500 leading-relaxed">Diabetes care, thyroid management, and hormonal disorder treatments tailored to your needs.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════ DOCTORS ══════════════════ -->
+<section class="bg-white py-[90px] px-[5%]" id="doctors">
+  <div class="text-center mb-14">
+    <p class="text-[0.78rem] font-bold tracking-[2px] uppercase text-blue-mid mb-2.5">Meet the Team</p>
+    <h2 class="font-display text-[clamp(1.8rem,3vw,2.5rem)] text-blue-dark mb-3.5">Our Expert Doctors</h2>
+    <p class="text-slate-500 text-base leading-7 max-w-[560px] mx-auto">Award-winning specialists dedicated to your health and well-being.</p>
+  </div>
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-7 max-w-[1100px] mx-auto">
+    <!-- Doctor 1 -->
+    <div class="bg-offwhite rounded-2xl overflow-hidden shadow-card hover:-translate-y-1.5 transition-transform reveal">
+      <img src="https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=400&q=80" alt="Dr. Arjun Mehta" class="w-full h-[220px] object-cover object-top"/>
+      <div class="p-5">
+        <h3 class="text-base font-bold text-blue-dark mb-1">Dr. Arjun Mehta</h3>
+        <div class="text-[0.8rem] text-blue-mid font-semibold mb-2">Senior Cardiologist</div>
+        <div class="text-[0.78rem] text-slate-500 mb-3.5"><i class="fas fa-clock"></i> 18 years experience</div>
+        <div class="flex gap-2.5">
+          <a href="#" class="w-[30px] h-[30px] rounded-lg bg-blue-pale flex items-center justify-center text-blue-mid text-xs hover:bg-blue-mid hover:text-white transition-all"><i class="fab fa-linkedin-in"></i></a>
+          <a href="#" class="w-[30px] h-[30px] rounded-lg bg-blue-pale flex items-center justify-center text-blue-mid text-xs hover:bg-blue-mid hover:text-white transition-all"><i class="fab fa-twitter"></i></a>
+          <a href="#" class="w-[30px] h-[30px] rounded-lg bg-blue-pale flex items-center justify-center text-blue-mid text-xs hover:bg-blue-mid hover:text-white transition-all"><i class="fas fa-envelope"></i></a>
+        </div>
+      </div>
+    </div>
+    <!-- Doctor 2 -->
+    <div class="bg-offwhite rounded-2xl overflow-hidden shadow-card hover:-translate-y-1.5 transition-transform reveal">
+      <img src="https://images.unsplash.com/photo-1594824476967-48c8b964273f?w=400&q=80" alt="Dr. Priya Sharma" class="w-full h-[220px] object-cover object-top"/>
+      <div class="p-5">
+        <h3 class="text-base font-bold text-blue-dark mb-1">Dr. Priya Sharma</h3>
+        <div class="text-[0.8rem] text-blue-mid font-semibold mb-2">Neurologist</div>
+        <div class="text-[0.78rem] text-slate-500 mb-3.5"><i class="fas fa-clock"></i> 14 years experience</div>
+        <div class="flex gap-2.5">
+          <a href="#" class="w-[30px] h-[30px] rounded-lg bg-blue-pale flex items-center justify-center text-blue-mid text-xs hover:bg-blue-mid hover:text-white transition-all"><i class="fab fa-linkedin-in"></i></a>
+          <a href="#" class="w-[30px] h-[30px] rounded-lg bg-blue-pale flex items-center justify-center text-blue-mid text-xs hover:bg-blue-mid hover:text-white transition-all"><i class="fab fa-twitter"></i></a>
+          <a href="#" class="w-[30px] h-[30px] rounded-lg bg-blue-pale flex items-center justify-center text-blue-mid text-xs hover:bg-blue-mid hover:text-white transition-all"><i class="fas fa-envelope"></i></a>
+        </div>
+      </div>
+    </div>
+    <!-- Doctor 3 -->
+    <div class="bg-offwhite rounded-2xl overflow-hidden shadow-card hover:-translate-y-1.5 transition-transform reveal">
+      <img src="https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=400&q=80" alt="Dr. Rohan Patel" class="w-full h-[220px] object-cover object-top"/>
+      <div class="p-5">
+        <h3 class="text-base font-bold text-blue-dark mb-1">Dr. Rohan Patel</h3>
+        <div class="text-[0.8rem] text-blue-mid font-semibold mb-2">Orthopedic Surgeon</div>
+        <div class="text-[0.78rem] text-slate-500 mb-3.5"><i class="fas fa-clock"></i> 11 years experience</div>
+        <div class="flex gap-2.5">
+          <a href="#" class="w-[30px] h-[30px] rounded-lg bg-blue-pale flex items-center justify-center text-blue-mid text-xs hover:bg-blue-mid hover:text-white transition-all"><i class="fab fa-linkedin-in"></i></a>
+          <a href="#" class="w-[30px] h-[30px] rounded-lg bg-blue-pale flex items-center justify-center text-blue-mid text-xs hover:bg-blue-mid hover:text-white transition-all"><i class="fab fa-twitter"></i></a>
+          <a href="#" class="w-[30px] h-[30px] rounded-lg bg-blue-pale flex items-center justify-center text-blue-mid text-xs hover:bg-blue-mid hover:text-white transition-all"><i class="fas fa-envelope"></i></a>
+        </div>
+      </div>
+    </div>
+    <!-- Doctor 4 -->
+    <div class="bg-offwhite rounded-2xl overflow-hidden shadow-card hover:-translate-y-1.5 transition-transform reveal">
+      <img src="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=400&q=80" alt="Dr. Ananya Singh" class="w-full h-[220px] object-cover object-top"/>
+      <div class="p-5">
+        <h3 class="text-base font-bold text-blue-dark mb-1">Dr. Ananya Singh</h3>
+        <div class="text-[0.8rem] text-blue-mid font-semibold mb-2">Pediatrician</div>
+        <div class="text-[0.78rem] text-slate-500 mb-3.5"><i class="fas fa-clock"></i> 9 years experience</div>
+        <div class="flex gap-2.5">
+          <a href="#" class="w-[30px] h-[30px] rounded-lg bg-blue-pale flex items-center justify-center text-blue-mid text-xs hover:bg-blue-mid hover:text-white transition-all"><i class="fab fa-linkedin-in"></i></a>
+          <a href="#" class="w-[30px] h-[30px] rounded-lg bg-blue-pale flex items-center justify-center text-blue-mid text-xs hover:bg-blue-mid hover:text-white transition-all"><i class="fab fa-twitter"></i></a>
+          <a href="#" class="w-[30px] h-[30px] rounded-lg bg-blue-pale flex items-center justify-center text-blue-mid text-xs hover:bg-blue-mid hover:text-white transition-all"><i class="fas fa-envelope"></i></a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════ DEPARTMENTS ══════════════════ -->
+<section class="bg-dept-grad py-[90px] px-[5%]" id="departments">
+  <div class="text-center mb-14">
+    <p class="text-[0.78rem] font-bold tracking-[2px] uppercase text-teal mb-2.5">Explore</p>
+    <h2 class="font-display text-[clamp(1.8rem,3vw,2.5rem)] text-white mb-3.5">Hospital Departments</h2>
+    <p class="text-white/65 text-base leading-7 max-w-[560px] mx-auto">Specialised units working together to ensure seamless, holistic care.</p>
+  </div>
+
+  <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-5 max-w-[1100px] mx-auto">
+    <div class="glass-dark rounded-2xl px-5 py-7 text-center hover:bg-blue-500/[0.18] hover:-translate-y-1 transition-all cursor-default reveal">
+      <div class="text-3xl mb-3">❤️</div><h3 class="text-white text-[0.95rem] font-bold mb-1.5">Cardiology</h3><p class="text-white/55 text-xs">Heart & Vascular</p>
+    </div>
+    <div class="glass-dark rounded-2xl px-5 py-7 text-center hover:bg-blue-500/[0.18] hover:-translate-y-1 transition-all cursor-default reveal">
+      <div class="text-3xl mb-3">🧠</div><h3 class="text-white text-[0.95rem] font-bold mb-1.5">Neuroscience</h3><p class="text-white/55 text-xs">Brain & Spine</p>
+    </div>
+    <div class="glass-dark rounded-2xl px-5 py-7 text-center hover:bg-blue-500/[0.18] hover:-translate-y-1 transition-all cursor-default reveal">
+      <div class="text-3xl mb-3">🦴</div><h3 class="text-white text-[0.95rem] font-bold mb-1.5">Orthopedics</h3><p class="text-white/55 text-xs">Joints & Bones</p>
+    </div>
+    <div class="glass-dark rounded-2xl px-5 py-7 text-center hover:bg-blue-500/[0.18] hover:-translate-y-1 transition-all cursor-default reveal">
+      <div class="text-3xl mb-3">👶</div><h3 class="text-white text-[0.95rem] font-bold mb-1.5">Neonatology</h3><p class="text-white/55 text-xs">Newborn Care</p>
+    </div>
+    <div class="glass-dark rounded-2xl px-5 py-7 text-center hover:bg-blue-500/[0.18] hover:-translate-y-1 transition-all cursor-default reveal">
+      <div class="text-3xl mb-3">🎗️</div><h3 class="text-white text-[0.95rem] font-bold mb-1.5">Oncology</h3><p class="text-white/55 text-xs">Cancer Centre</p>
+    </div>
+    <div class="glass-dark rounded-2xl px-5 py-7 text-center hover:bg-blue-500/[0.18] hover:-translate-y-1 transition-all cursor-default reveal">
+      <div class="text-3xl mb-3">🫁</div><h3 class="text-white text-[0.95rem] font-bold mb-1.5">Pulmonology</h3><p class="text-white/55 text-xs">Respiratory</p>
+    </div>
+    <div class="glass-dark rounded-2xl px-5 py-7 text-center hover:bg-blue-500/[0.18] hover:-translate-y-1 transition-all cursor-default reveal">
+      <div class="text-3xl mb-3">👁️</div><h3 class="text-white text-[0.95rem] font-bold mb-1.5">Ophthalmology</h3><p class="text-white/55 text-xs">Eye Care</p>
+    </div>
+    <div class="glass-dark rounded-2xl px-5 py-7 text-center hover:bg-blue-500/[0.18] hover:-translate-y-1 transition-all cursor-default reveal">
+      <div class="text-3xl mb-3">🦷</div><h3 class="text-white text-[0.95rem] font-bold mb-1.5">Dentistry</h3><p class="text-white/55 text-xs">Oral Health</p>
+    </div>
+    <div class="glass-dark rounded-2xl px-5 py-7 text-center hover:bg-blue-500/[0.18] hover:-translate-y-1 transition-all cursor-default reveal">
+      <div class="text-3xl mb-3">🩺</div><h3 class="text-white text-[0.95rem] font-bold mb-1.5">General Medicine</h3><p class="text-white/55 text-xs">Primary Care</p>
+    </div>
+    <div class="glass-dark rounded-2xl px-5 py-7 text-center hover:bg-blue-500/[0.18] hover:-translate-y-1 transition-all cursor-default reveal">
+      <div class="text-3xl mb-3">🏋️</div><h3 class="text-white text-[0.95rem] font-bold mb-1.5">Physiotherapy</h3><p class="text-white/55 text-xs">Rehabilitation</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════ EMERGENCY BANNER ══════════════════ -->
+<div class="bg-emerg-grad py-9 px-[5%] text-center">
+  <h2 class="text-white text-2xl font-bold mb-2.5"><i class="fas fa-truck-medical"></i> 24/7 Emergency Services Available</h2>
+  <p class="text-white/85 mb-5 text-[0.95rem]">Our emergency unit is always ready. Don't hesitate — call us immediately in any medical crisis.</p>
+  <span class="block text-3xl font-extrabold text-white mb-4"><i class="fas fa-phone-volume"></i> 1800-MED-CORE</span>
+  <button class="bg-white text-red-600 font-bold px-7 py-3 rounded-lg text-[0.95rem] hover:opacity-90 transition-opacity cursor-pointer border-0">
+    <i class="fas fa-ambulance"></i> Call Emergency
+  </button>
+</div>
+
+<!-- ══════════════════ APPOINTMENT ══════════════════ -->
+<section class="bg-offwhite py-[90px] px-[5%]" id="appointment">
+  <div class="text-center mb-14">
+    <p class="text-[0.78rem] font-bold tracking-[2px] uppercase text-blue-mid mb-2.5">Book Now</p>
+    <h2 class="font-display text-[clamp(1.8rem,3vw,2.5rem)] text-blue-dark mb-3.5">Schedule an Appointment</h2>
+    <p class="text-slate-500 text-base leading-7 max-w-[560px] mx-auto">Fill in the form and our team will confirm your slot within 2 hours.</p>
+  </div>
+
+  <div class="max-w-[760px] mx-auto bg-white rounded-[20px] p-12 shadow-card reveal">
+    <form id="apptForm" novalidate>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+
+        <div class="form-group flex flex-col gap-1.5" id="fg-fname">
+          <label for="fname" class="text-[0.82rem] font-semibold text-blue-dark">First Name</label>
+          <input type="text" id="fname" placeholder="John" class="form-input border-[1.5px] border-slate-200 rounded-[10px] px-3.5 py-3 text-[0.9rem] font-sans text-slate-800 bg-offwhite transition-all"/>
+          <span class="error-msg">Please enter your first name.</span>
+        </div>
+
+        <div class="form-group flex flex-col gap-1.5" id="fg-lname">
+          <label for="lname" class="text-[0.82rem] font-semibold text-blue-dark">Last Name</label>
+          <input type="text" id="lname" placeholder="Doe" class="form-input border-[1.5px] border-slate-200 rounded-[10px] px-3.5 py-3 text-[0.9rem] font-sans text-slate-800 bg-offwhite transition-all"/>
+          <span class="error-msg">Please enter your last name.</span>
+        </div>
+
+        <div class="form-group flex flex-col gap-1.5" id="fg-email">
+          <label for="email" class="text-[0.82rem] font-semibold text-blue-dark">Email Address</label>
+          <input type="email" id="email" placeholder="john@example.com" class="form-input border-[1.5px] border-slate-200 rounded-[10px] px-3.5 py-3 text-[0.9rem] font-sans text-slate-800 bg-offwhite transition-all"/>
+          <span class="error-msg">Please enter a valid email.</span>
+        </div>
+
+        <div class="form-group flex flex-col gap-1.5" id="fg-phone">
+          <label for="phone" class="text-[0.82rem] font-semibold text-blue-dark">Phone Number</label>
+          <input type="tel" id="phone" placeholder="+977 98XXXXXXXX" class="form-input border-[1.5px] border-slate-200 rounded-[10px] px-3.5 py-3 text-[0.9rem] font-sans text-slate-800 bg-offwhite transition-all"/>
+          <span class="error-msg">Please enter a valid phone number.</span>
+        </div>
+
+        <div class="form-group flex flex-col gap-1.5" id="fg-dept">
+          <label for="dept" class="text-[0.82rem] font-semibold text-blue-dark">Department</label>
+          <select id="dept" class="form-input border-[1.5px] border-slate-200 rounded-[10px] px-3.5 py-3 text-[0.9rem] font-sans text-slate-800 bg-offwhite transition-all">
+            <option value="">Select Department</option>
+            <option>Cardiology</option><option>Neurology</option><option>Orthopedics</option>
+            <option>Pediatrics</option><option>Oncology</option><option>General Medicine</option>
+          </select>
+          <span class="error-msg">Please select a department.</span>
+        </div>
+
+        <div class="form-group flex flex-col gap-1.5" id="fg-date">
+          <label for="apptDate" class="text-[0.82rem] font-semibold text-blue-dark">Preferred Date</label>
+          <input type="date" id="apptDate" class="form-input border-[1.5px] border-slate-200 rounded-[10px] px-3.5 py-3 text-[0.9rem] font-sans text-slate-800 bg-offwhite transition-all"/>
+          <span class="error-msg">Please select a date.</span>
+        </div>
+
+        <div class="form-group sm:col-span-2 flex flex-col gap-1.5" id="fg-msg">
+          <label for="msg" class="text-[0.82rem] font-semibold text-blue-dark">Message (Optional)</label>
+          <textarea id="msg" rows="3" placeholder="Brief description of your concern..." class="form-input border-[1.5px] border-slate-200 rounded-[10px] px-3.5 py-3 text-[0.9rem] font-sans text-slate-800 bg-offwhite resize-none transition-all"></textarea>
+        </div>
+      </div>
+
+      <button type="submit" class="mt-2.5 w-full bg-brand-grad text-white py-3.5 rounded-[10px] font-semibold text-[0.95rem] shadow-brand hover:-translate-y-0.5 hover:shadow-brand-lg transition-all cursor-pointer border-0">
+        Confirm Appointment &nbsp;<i class="fas fa-arrow-right"></i>
+      </button>
+      <div id="successMsg" class="hidden mt-3.5 bg-emerald-500/10 border border-emerald-500/30 text-emerald-800 rounded-[10px] p-3.5 text-center font-semibold">
+        ✅ Appointment booked! We'll confirm via email shortly.
+      </div>
+    </form>
+  </div>
+</section>
+
+<!-- ══════════════════ PATIENT RECORDS ══════════════════ -->
+<section class="bg-white py-[90px] px-[5%]" id="records">
+  <div class="text-center mb-14">
+    <p class="text-[0.78rem] font-bold tracking-[2px] uppercase text-blue-mid mb-2.5">Records</p>
+    <h2 class="font-display text-[clamp(1.8rem,3vw,2.5rem)] text-blue-dark mb-3.5">Patient Records</h2>
+    <p class="text-slate-500 text-base leading-7 max-w-[560px] mx-auto">Current admissions and recent patient status overview.</p>
+  </div>
+
+  <div class="overflow-x-auto rounded-2xl shadow-card reveal max-w-[1100px] mx-auto">
+    <table class="w-full border-collapse text-[0.85rem]">
+      <thead class="bg-brand-grad">
+        <tr>
+          <th class="text-white text-left px-[18px] py-3.5 font-semibold">Patient ID</th>
+          <th class="text-white text-left px-[18px] py-3.5 font-semibold">Name</th>
+          <th class="text-white text-left px-[18px] py-3.5 font-semibold">Age</th>
+          <th class="text-white text-left px-[18px] py-3.5 font-semibold">Department</th>
+          <th class="text-white text-left px-[18px] py-3.5 font-semibold">Doctor</th>
+          <th class="text-white text-left px-[18px] py-3.5 font-semibold">Admission</th>
+          <th class="text-white text-left px-[18px] py-3.5 font-semibold">Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="border-b border-slate-100 hover:bg-offwhite transition-colors">
+          <td class="px-[18px] py-3.5">#MC-1041</td><td class="px-[18px] py-3.5">Riya Kapoor</td><td class="px-[18px] py-3.5">34</td><td class="px-[18px] py-3.5">Cardiology</td><td class="px-[18px] py-3.5">Dr. Mehta</td><td class="px-[18px] py-3.5">2025-06-18</td>
+          <td class="px-[18px] py-3.5"><span class="inline-block px-3 py-0.5 rounded-full text-[0.72rem] font-bold bg-emerald-500/10 text-emerald-700">Active</span></td>
+        </tr>
+        <tr class="border-b border-slate-100 hover:bg-offwhite transition-colors">
+          <td class="px-[18px] py-3.5">#MC-1042</td><td class="px-[18px] py-3.5">Suresh Thapa</td><td class="px-[18px] py-3.5">56</td><td class="px-[18px] py-3.5">Orthopedics</td><td class="px-[18px] py-3.5">Dr. Patel</td><td class="px-[18px] py-3.5">2025-06-17</td>
+          <td class="px-[18px] py-3.5"><span class="inline-block px-3 py-0.5 rounded-full text-[0.72rem] font-bold bg-amber-500/10 text-amber-800">Pending</span></td>
+        </tr>
+        <tr class="border-b border-slate-100 hover:bg-offwhite transition-colors">
+          <td class="px-[18px] py-3.5">#MC-1043</td><td class="px-[18px] py-3.5">Meena Joshi</td><td class="px-[18px] py-3.5">29</td><td class="px-[18px] py-3.5">Neurology</td><td class="px-[18px] py-3.5">Dr. Sharma</td><td class="px-[18px] py-3.5">2025-06-15</td>
+          <td class="px-[18px] py-3.5"><span class="inline-block px-3 py-0.5 rounded-full text-[0.72rem] font-bold bg-indigo-500/10 text-indigo-800">Discharged</span></td>
+        </tr>
+        <tr class="border-b border-slate-100 hover:bg-offwhite transition-colors">
+          <td class="px-[18px] py-3.5">#MC-1044</td><td class="px-[18px] py-3.5">Prakash Rai</td><td class="px-[18px] py-3.5">72</td><td class="px-[18px] py-3.5">General Medicine</td><td class="px-[18px] py-3.5">Dr. Singh</td><td class="px-[18px] py-3.5">2025-06-20</td>
+          <td class="px-[18px] py-3.5"><span class="inline-block px-3 py-0.5 rounded-full text-[0.72rem] font-bold bg-red-500/10 text-red-800">Critical</span></td>
+        </tr>
+        <tr class="border-b border-slate-100 hover:bg-offwhite transition-colors">
+          <td class="px-[18px] py-3.5">#MC-1045</td><td class="px-[18px] py-3.5">Anita Ghimire</td><td class="px-[18px] py-3.5">41</td><td class="px-[18px] py-3.5">Oncology</td><td class="px-[18px] py-3.5">Dr. Mehta</td><td class="px-[18px] py-3.5">2025-06-19</td>
+          <td class="px-[18px] py-3.5"><span class="inline-block px-3 py-0.5 rounded-full text-[0.72rem] font-bold bg-emerald-500/10 text-emerald-700">Active</span></td>
+        </tr>
+        <tr class="hover:bg-offwhite transition-colors">
+          <td class="px-[18px] py-3.5">#MC-1046</td><td class="px-[18px] py-3.5">Bikash Lama</td><td class="px-[18px] py-3.5">18</td><td class="px-[18px] py-3.5">Pediatrics</td><td class="px-[18px] py-3.5">Dr. Singh</td><td class="px-[18px] py-3.5">2025-06-21</td>
+          <td class="px-[18px] py-3.5"><span class="inline-block px-3 py-0.5 rounded-full text-[0.72rem] font-bold bg-amber-500/10 text-amber-800">Pending</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ══════════════════ TESTIMONIALS ══════════════════ -->
+<section class="bg-offwhite py-[90px] px-[5%]" id="testimonials">
+  <div class="text-center mb-14">
+    <p class="text-[0.78rem] font-bold tracking-[2px] uppercase text-blue-mid mb-2.5">Patient Stories</p>
+    <h2 class="font-display text-[clamp(1.8rem,3vw,2.5rem)] text-blue-dark mb-3.5">What Our Patients Say</h2>
+    <p class="text-slate-500 text-base leading-7 max-w-[560px] mx-auto">Real stories from real people who trusted MedCore with their health.</p>
+  </div>
+
+  <div class="relative max-w-[720px] mx-auto overflow-hidden">
+    <div class="slides" id="slides">
+      <div class="slide">
+        <div class="bg-white rounded-[20px] p-10 shadow-card mx-4 text-center">
+          <div class="text-amber-400 text-xl mb-4">★★★★★</div>
+          <p class="text-slate-500 text-[0.95rem] leading-7 mb-6 italic">"Dr. Mehta's team diagnosed my condition in under an hour when other hospitals had been guessing for weeks. The care I received at MedCore was absolutely life-changing."</p>
+          <div class="flex items-center justify-center gap-3">
+            <div class="w-11 h-11 rounded-full bg-brand-grad flex items-center justify-center text-white font-bold">RK</div>
+            <div class="text-left"><div class="font-bold text-[0.9rem]">Riya Kapoor</div><div class="text-xs text-slate-500">Cardiology Patient</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="slide">
+        <div class="bg-white rounded-[20px] p-10 shadow-card mx-4 text-center">
+          <div class="text-amber-400 text-xl mb-4">★★★★★</div>
+          <p class="text-slate-500 text-[0.95rem] leading-7 mb-6 italic">"From registration to discharge, every staff member was professional and warm. The online appointment system saved me hours, and my daughter received excellent pediatric care."</p>
+          <div class="flex items-center justify-center gap-3">
+            <div class="w-11 h-11 rounded-full bg-brand-grad flex items-center justify-center text-white font-bold">MT</div>
+            <div class="text-left"><div class="font-bold text-[0.9rem]">Meena Tamang</div><div class="text-xs text-slate-500">Pediatrics Parent</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="slide">
+        <div class="bg-white rounded-[20px] p-10 shadow-card mx-4 text-center">
+          <div class="text-amber-400 text-xl mb-4">★★★★☆</div>
+          <p class="text-slate-500 text-[0.95rem] leading-7 mb-6 italic">"My knee replacement surgery went smoothly and the physiotherapy team had me walking confidently within weeks. I couldn't be happier with the results at MedCore."</p>
+          <div class="flex items-center justify-center gap-3">
+            <div class="w-11 h-11 rounded-full bg-brand-grad flex items-center justify-center text-white font-bold">ST</div>
+            <div class="text-left"><div class="font-bold text-[0.9rem]">Suresh Thapa</div><div class="text-xs text-slate-500">Orthopedics Patient</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="flex justify-center gap-3 mt-7">
+    <button onclick="changeSlide(-1)" class="w-10 h-10 rounded-full bg-blue-pale text-blue-mid hover:bg-blue-mid hover:text-white transition-all border-0 cursor-pointer"><i class="fas fa-chevron-left"></i></button>
+    <button onclick="changeSlide(1)"  class="w-10 h-10 rounded-full bg-blue-pale text-blue-mid hover:bg-blue-mid hover:text-white transition-all border-0 cursor-pointer"><i class="fas fa-chevron-right"></i></button>
+  </div>
+  <div class="flex justify-center gap-2 mt-4" id="dots">
+    <div class="w-2 h-2 rounded-full bg-blue-mid cursor-pointer dot active" onclick="goSlide(0)"></div>
+    <div class="w-2 h-2 rounded-full bg-slate-300 cursor-pointer dot" onclick="goSlide(1)"></div>
+    <div class="w-2 h-2 rounded-full bg-slate-300 cursor-pointer dot" onclick="goSlide(2)"></div>
+  </div>
+</section>
+
+<!-- ══════════════════ FAQ ══════════════════ -->
+<section class="bg-white py-[90px] px-[5%]" id="faq">
+  <div class="text-center mb-14">
+    <p class="text-[0.78rem] font-bold tracking-[2px] uppercase text-blue-mid mb-2.5">FAQs</p>
+    <h2 class="font-display text-[clamp(1.8rem,3vw,2.5rem)] text-blue-dark mb-3.5">Frequently Asked Questions</h2>
+    <p class="text-slate-500 text-base leading-7 max-w-[560px] mx-auto">Got questions? We've got answers. Reach out if you need more help.</p>
+  </div>
+
+  <div class="max-w-[780px] mx-auto flex flex-col gap-3">
+    <div class="faq-item border-[1.5px] border-slate-200 rounded-[10px] overflow-hidden">
+      <button class="faq-q w-full bg-transparent border-0 px-[22px] py-[18px] text-left cursor-pointer flex justify-between items-center text-[0.95rem] font-semibold text-blue-dark font-sans hover:bg-offwhite transition-colors" onclick="toggleFaq(this)">
+        How do I book an appointment online? <span class="faq-arrow text-blue-mid text-[0.85rem] transition-transform duration-300"><i class="fas fa-chevron-down"></i></span>
+      </button>
+      <div class="faq-a"><p class="px-[22px] pb-[18px] text-slate-500 text-[0.88rem] leading-7">Scroll to our Appointment section, fill in your name, contact details, preferred department, and date. Our team confirms your slot within 2 hours via email or phone.</p></div>
+    </div>
+    <div class="faq-item border-[1.5px] border-slate-200 rounded-[10px] overflow-hidden">
+      <button class="faq-q w-full bg-transparent border-0 px-[22px] py-[18px] text-left cursor-pointer flex justify-between items-center text-[0.95rem] font-semibold text-blue-dark font-sans hover:bg-offwhite transition-colors" onclick="toggleFaq(this)">
+        What insurance plans does MedCore accept? <span class="faq-arrow text-blue-mid text-[0.85rem] transition-transform duration-300"><i class="fas fa-chevron-down"></i></span>
+      </button>
+      <div class="faq-a"><p class="px-[22px] pb-[18px] text-slate-500 text-[0.88rem] leading-7">We accept most major insurance providers including National Health Insurance, Star Health, HDFC ERGO, and government health schemes. Contact our billing desk for a complete list.</p></div>
+    </div>
+    <div class="faq-item border-[1.5px] border-slate-200 rounded-[10px] overflow-hidden">
+      <button class="faq-q w-full bg-transparent border-0 px-[22px] py-[18px] text-left cursor-pointer flex justify-between items-center text-[0.95rem] font-semibold text-blue-dark font-sans hover:bg-offwhite transition-colors" onclick="toggleFaq(this)">
+        Is the emergency department open 24 hours? <span class="faq-arrow text-blue-mid text-[0.85rem] transition-transform duration-300"><i class="fas fa-chevron-down"></i></span>
+      </button>
+      <div class="faq-a"><p class="px-[22px] pb-[18px] text-slate-500 text-[0.88rem] leading-7">Yes. Our emergency unit operates 24 hours a day, 7 days a week, 365 days a year. Call 1800-MED-CORE or walk in for immediate care — triage begins within 3 minutes of arrival.</p></div>
+    </div>
+    <div class="faq-item border-[1.5px] border-slate-200 rounded-[10px] overflow-hidden">
+      <button class="faq-q w-full bg-transparent border-0 px-[22px] py-[18px] text-left cursor-pointer flex justify-between items-center text-[0.95rem] font-semibold text-blue-dark font-sans hover:bg-offwhite transition-colors" onclick="toggleFaq(this)">
+        Can I access my medical records online? <span class="faq-arrow text-blue-mid text-[0.85rem] transition-transform duration-300"><i class="fas fa-chevron-down"></i></span>
+      </button>
+      <div class="faq-a"><p class="px-[22px] pb-[18px] text-slate-500 text-[0.88rem] leading-7">Registered patients can log into the MedCore Patient Portal to view lab results, discharge summaries, prescriptions, and appointment history at any time.</p></div>
+    </div>
+    <div class="faq-item border-[1.5px] border-slate-200 rounded-[10px] overflow-hidden">
+      <button class="faq-q w-full bg-transparent border-0 px-[22px] py-[18px] text-left cursor-pointer flex justify-between items-center text-[0.95rem] font-semibold text-blue-dark font-sans hover:bg-offwhite transition-colors" onclick="toggleFaq(this)">
+        What are the visiting hours for admitted patients? <span class="faq-arrow text-blue-mid text-[0.85rem] transition-transform duration-300"><i class="fas fa-chevron-down"></i></span>
+      </button>
+      <div class="faq-a"><p class="px-[22px] pb-[18px] text-slate-500 text-[0.88rem] leading-7">General visiting hours are 10:00 AM – 12:00 PM and 5:00 PM – 7:00 PM daily. ICU visiting is restricted to immediate family from 4:00 PM – 5:00 PM only.</p></div>
+    </div>
+    <div class="faq-item border-[1.5px] border-slate-200 rounded-[10px] overflow-hidden">
+      <button class="faq-q w-full bg-transparent border-0 px-[22px] py-[18px] text-left cursor-pointer flex justify-between items-center text-[0.95rem] font-semibold text-blue-dark font-sans hover:bg-offwhite transition-colors" onclick="toggleFaq(this)">
+        Does MedCore offer telemedicine consultations? <span class="faq-arrow text-blue-mid text-[0.85rem] transition-transform duration-300"><i class="fas fa-chevron-down"></i></span>
+      </button>
+      <div class="faq-a"><p class="px-[22px] pb-[18px] text-slate-500 text-[0.88rem] leading-7">Absolutely. Book a video consultation through our portal or app. Telemedicine is available for follow-ups, prescription renewals, and general consultations Monday–Saturday, 8 AM–8 PM.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════ CONTACT ══════════════════ -->
+<section class="bg-offwhite py-[90px] px-[5%]" id="contact">
+  <div class="text-center mb-14">
+    <p class="text-[0.78rem] font-bold tracking-[2px] uppercase text-blue-mid mb-2.5">Get in Touch</p>
+    <h2 class="font-display text-[clamp(1.8rem,3vw,2.5rem)] text-blue-dark mb-3.5">Contact Us</h2>
+    <p class="text-slate-500 text-base leading-7 max-w-[560px] mx-auto">We're here to help. Reach out by phone, email, or visit us in person.</p>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-[1fr_1.4fr] gap-12 max-w-[1100px] mx-auto">
+    <!-- Info Cards -->
+    <div class="flex flex-col gap-5 reveal">
+      <div class="bg-white rounded-2xl p-[22px] shadow-card flex gap-3.5 items-start">
+        <div class="w-11 h-11 min-w-[44px] rounded-[10px] bg-blue-pale flex items-center justify-center text-blue-mid"><i class="fas fa-location-dot"></i></div>
+        <div><h4 class="text-[0.88rem] font-bold mb-1">Address</h4><p class="text-[0.83rem] text-slate-500">MedCore Hospital, Baneshwor Chowk<br/>Kathmandu, Bagmati Province, Nepal</p></div>
+      </div>
+      <div class="bg-white rounded-2xl p-[22px] shadow-card flex gap-3.5 items-start">
+        <div class="w-11 h-11 min-w-[44px] rounded-[10px] bg-blue-pale flex items-center justify-center text-blue-mid"><i class="fas fa-phone"></i></div>
+        <div>
+          <h4 class="text-[0.88rem] font-bold mb-1">Phone</h4>
+          <a href="tel:+97701234567" class="text-[0.83rem] text-slate-500 block no-underline">+977 01-234567</a>
+          <a href="tel:18001234" class="text-[0.83rem] text-slate-500 no-underline">1800-MED-CORE (Toll Free)</a>
+        </div>
+      </div>
+      <div class="bg-white rounded-2xl p-[22px] shadow-card flex gap-3.5 items-start">
+        <div class="w-11 h-11 min-w-[44px] rounded-[10px] bg-blue-pale flex items-center justify-center text-blue-mid"><i class="fas fa-envelope"></i></div>
+        <div>
+          <h4 class="text-[0.88rem] font-bold mb-1">Email</h4>
+          <a href="mailto:info@medcore.com.np" class="text-[0.83rem] text-slate-500 block no-underline">info@medcore.com.np</a>
+          <a href="mailto:emergency@medcore.com.np" class="text-[0.83rem] text-slate-500 no-underline">emergency@medcore.com.np</a>
+        </div>
+      </div>
+      <div class="bg-white rounded-2xl p-[22px] shadow-card flex gap-3.5 items-start">
+        <div class="w-11 h-11 min-w-[44px] rounded-[10px] bg-blue-pale flex items-center justify-center text-blue-mid"><i class="fas fa-clock"></i></div>
+        <div class="w-full">
+          <h4 class="text-[0.88rem] font-bold mb-2">Working Hours</h4>
+          <div class="grid grid-cols-2 gap-x-5">
+            <div class="flex justify-between py-1 border-b border-slate-100 text-[0.82rem]"><span class="font-semibold text-slate-800">Mon – Fri</span><span class="text-slate-500">8:00 AM – 8:00 PM</span></div>
+            <div class="flex justify-between py-1 border-b border-slate-100 text-[0.82rem]"><span class="font-semibold text-slate-800">Saturday</span><span class="text-slate-500">9:00 AM – 5:00 PM</span></div>
+            <div class="flex justify-between py-1 border-b border-slate-100 text-[0.82rem]"><span class="font-semibold text-slate-800">Sunday</span><span class="text-slate-500">Emergency Only</span></div>
+            <div class="flex justify-between py-1 text-[0.82rem]"><span class="font-semibold text-slate-800">Emergency</span><span class="text-slate-500">24/7</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Map -->
+    <div class="bg-slate-200 rounded-2xl overflow-hidden h-[420px] reveal">
+      <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3532.424993046856!2d85.3205!3d27.7017!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39eb19a9d0a0a0a9%3A0x0!2sBaneshwor%2C%20Kathmandu!5e0!3m2!1sen!2snp!4v1700000000000"
+        class="w-full h-full border-0" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════ FOOTER ══════════════════ -->
+<footer class="bg-blue-dark pt-16 pb-8 px-[5%]">
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[1.5fr_1fr_1fr_1fr] gap-10 max-w-[1100px] mx-auto mb-10">
+    <div>
+      <a href="#" class="flex items-center gap-2.5 no-underline">
+        <div class="w-10 h-10 rounded-[10px] bg-brand-grad flex items-center justify-center text-white text-lg"><i class="fas fa-plus"></i></div>
+        <span class="font-display text-xl text-white font-bold">Med<span class="text-teal">Core</span></span>
+      </a>
+      <p class="text-white/55 text-[0.83rem] my-3.5 leading-7">MedCore Clinical Management System — delivering compassionate, technology-driven healthcare since 1998. Your health is our mission.</p>
+      <div class="flex gap-2.5">
+        <a href="#" class="w-[34px] h-[34px] rounded-lg bg-white/10 flex items-center justify-center text-white/70 text-[0.85rem] hover:bg-teal hover:text-white transition-all"><i class="fab fa-facebook-f"></i></a>
+        <a href="#" class="w-[34px] h-[34px] rounded-lg bg-white/10 flex items-center justify-center text-white/70 text-[0.85rem] hover:bg-teal hover:text-white transition-all"><i class="fab fa-twitter"></i></a>
+        <a href="#" class="w-[34px] h-[34px] rounded-lg bg-white/10 flex items-center justify-center text-white/70 text-[0.85rem] hover:bg-teal hover:text-white transition-all"><i class="fab fa-instagram"></i></a>
+        <a href="#" class="w-[34px] h-[34px] rounded-lg bg-white/10 flex items-center justify-center text-white/70 text-[0.85rem] hover:bg-teal hover:text-white transition-all"><i class="fab fa-linkedin-in"></i></a>
+        <a href="#" class="w-[34px] h-[34px] rounded-lg bg-white/10 flex items-center justify-center text-white/70 text-[0.85rem] hover:bg-teal hover:text-white transition-all"><i class="fab fa-youtube"></i></a>
+      </div>
+    </div>
+    <div>
+      <h4 class="text-white text-[0.92rem] font-bold mb-4">Quick Links</h4>
+      <ul class="flex flex-col gap-2.5 list-none">
+        <li><a href="#about"       class="text-white/55 text-[0.83rem] no-underline hover:text-teal transition-colors">About Us</a></li>
+        <li><a href="#services"    class="text-white/55 text-[0.83rem] no-underline hover:text-teal transition-colors">Services</a></li>
+        <li><a href="#doctors"     class="text-white/55 text-[0.83rem] no-underline hover:text-teal transition-colors">Our Doctors</a></li>
+        <li><a href="#departments" class="text-white/55 text-[0.83rem] no-underline hover:text-teal transition-colors">Departments</a></li>
+        <li><a href="#appointment" class="text-white/55 text-[0.83rem] no-underline hover:text-teal transition-colors">Book Appointment</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4 class="text-white text-[0.92rem] font-bold mb-4">Departments</h4>
+      <ul class="flex flex-col gap-2.5 list-none">
+        <li><a href="#" class="text-white/55 text-[0.83rem] no-underline hover:text-teal transition-colors">Cardiology</a></li>
+        <li><a href="#" class="text-white/55 text-[0.83rem] no-underline hover:text-teal transition-colors">Neurology</a></li>
+        <li><a href="#" class="text-white/55 text-[0.83rem] no-underline hover:text-teal transition-colors">Orthopedics</a></li>
+        <li><a href="#" class="text-white/55 text-[0.83rem] no-underline hover:text-teal transition-colors">Pediatrics</a></li>
+        <li><a href="#" class="text-white/55 text-[0.83rem] no-underline hover:text-teal transition-colors">Oncology</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4 class="text-white text-[0.92rem] font-bold mb-4">Support</h4>
+      <ul class="flex flex-col gap-2.5 list-none">
+        <li><a href="#faq"     class="text-white/55 text-[0.83rem] no-underline hover:text-teal transition-colors">FAQs</a></li>
+        <li><a href="#contact" class="text-white/55 text-[0.83rem] no-underline hover:text-teal transition-colors">Contact Us</a></li>
+        <li><a href="#"        class="text-white/55 text-[0.83rem] no-underline hover:text-teal transition-colors">Patient Portal</a></li>
+        <li><a href="#"        class="text-white/55 text-[0.83rem] no-underline hover:text-teal transition-colors">Privacy Policy</a></li>
+        <li><a href="#"        class="text-white/55 text-[0.83rem] no-underline hover:text-teal transition-colors">Terms of Service</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="border-t border-white/10 pt-6 text-center text-white/40 text-[0.78rem] max-w-[1100px] mx-auto">
+    <p>© 2025 MedCore Hospital. All rights reserved. | Designed for educational purposes.</p>
+  </div>
+</footer>
+
+<!-- BACK TO TOP -->
+<button id="backTop" onclick="window.scrollTo({top:0,behavior:'smooth'})"
+  class="fixed bottom-7 right-7 z-[900] w-11 h-11 rounded-xl bg-brand-grad text-white border-0 text-base cursor-pointer shadow-[0_4px_16px_rgba(26,86,219,0.4)] opacity-0 translate-y-2.5 transition-all duration-300">
+  <i class="fas fa-chevron-up"></i>
+</button>
+
+<!-- ══════════════════ SCRIPTS ══════════════════ -->
+<script>
+  // ── LOADER ──
+  window.addEventListener('load', () => {
+    const loader = document.getElementById('loader');
+    setTimeout(() => {
+      loader.style.opacity = '0';
+      setTimeout(() => loader.remove(), 500);
+    }, 1200);
+  });
+
+  // ── HEADER SCROLL ──
+  window.addEventListener('scroll', () => {
+    const header = document.getElementById('header');
+    header.classList.toggle('shadow-[0_4px_24px_rgba(10,31,68,0.4)]', window.scrollY > 50);
+    const btn = document.getElementById('backTop');
+    if (window.scrollY > 400) { btn.style.opacity='1'; btn.style.transform='translateY(0)'; }
+    else { btn.style.opacity='0'; btn.style.transform='translateY(10px)'; }
+  });
+
+  // ── MOBILE MENU ──
+  function toggleMenu() {
+    const nav = document.getElementById('mobileNav');
+    nav.classList.toggle('hidden');
+    nav.classList.toggle('flex');
+  }
+  function closeMenu() {
+    const nav = document.getElementById('mobileNav');
+    nav.classList.add('hidden');
+    nav.classList.remove('flex');
+  }
+
+  // ── ANIMATED COUNTERS ──
+  function animateCounter(el) {
+    const target = +el.getAttribute('data-target');
+    const step = target / (1800 / 16);
+    let current = 0;
+    const timer = setInterval(() => {
+      current += step;
+      if (current >= target) { current = target; clearInterval(timer); }
+      el.textContent = Math.floor(current).toLocaleString();
+    }, 16);
+  }
+
+  // ── SCROLL REVEAL ──
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        entry.target.querySelectorAll('.count').forEach(animateCounter);
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.15 });
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+  // ── FAQ ──
+  function toggleFaq(btn) {
+    const item = btn.parentElement;
+    const isOpen = item.classList.contains('open');
+    document.querySelectorAll('.faq-item.open').forEach(i => i.classList.remove('open'));
+    if (!isOpen) item.classList.add('open');
+  }
+
+  // ── SLIDER ──
+  let currentSlide = 0;
+  const totalSlides = 3;
+  function updateSlider() {
+    document.getElementById('slides').style.transform = `translateX(-${currentSlide * 100}%)`;
+    document.querySelectorAll('.dot').forEach((d, i) => {
+      d.classList.toggle('bg-blue-mid', i === currentSlide);
+      d.classList.toggle('bg-slate-300', i !== currentSlide);
+    });
+  }
+  function changeSlide(dir) { currentSlide = (currentSlide + dir + totalSlides) % totalSlides; updateSlider(); }
+  function goSlide(i) { currentSlide = i; updateSlider(); }
+  setInterval(() => changeSlide(1), 5000);
+
+  // ── FORM VALIDATION ──
+  document.getElementById('apptForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    let valid = true;
+    function validate(id, condition) {
+      const fg = document.getElementById('fg-' + id);
+      fg.classList.toggle('invalid', !condition);
+      if (!condition) valid = false;
+    }
+    validate('fname', document.getElementById('fname').value.trim().length >= 2);
+    validate('lname', document.getElementById('lname').value.trim().length >= 2);
+    validate('email', /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(document.getElementById('email').value.trim()));
+    validate('phone', /^[\d\s\+\-]{7,}$/.test(document.getElementById('phone').value.trim()));
+    validate('dept',  document.getElementById('dept').value !== '');
+    validate('date',  document.getElementById('apptDate').value !== '');
+    if (valid) {
+      const msg = document.getElementById('successMsg');
+      msg.classList.remove('hidden');
+      this.reset();
+      setTimeout(() => msg.classList.add('hidden'), 5000);
+    }
+  });
+  document.querySelectorAll('.form-input').forEach(el => {
+    el.addEventListener('input', () => el.closest('.form-group')?.classList.remove('invalid'));
+  });
+</script>
+</body>
+</html>
